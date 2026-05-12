@@ -1,0 +1,28 @@
+{
+  "port": 4545,
+  "protocol": "http",
+  "name": "currency-usd-rub",
+  "stubs": [
+    {
+      "predicates": [
+        {
+          "equals": {
+            "method": "GET",
+            "path": "/rates/usd-rub"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "is": {
+            "statusCode": 200,
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": "{\"rate\":93.35}"
+          }
+        }
+      ]
+    }
+  ]
+}
