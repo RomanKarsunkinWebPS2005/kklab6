@@ -1,7 +1,7 @@
 import { SubscriptionPriceEngine } from './subscription-price-engine';
 import type { CurrencyRateSource } from './currency-rate-client';
 
-describe('SubscriptionPriceEngine (лондонская школа: мок CurrencyRateSource)', () => {
+describe('SubscriptionPriceEngine', () => {
   let engine: SubscriptionPriceEngine;
 
   beforeEach(() => {
@@ -14,24 +14,26 @@ describe('SubscriptionPriceEngine (лондонская школа: мок Curre
       expect(engine.getUsdToRub()).toBe(100);
     });
 
-    it('отклоняет неположительный или нечисловой курс', () => {
-      expect(() => engine.setUsdToRubRate(0)).toThrow(RangeError);
-      expect(() => engine.setUsdToRubRate(-1)).toThrow(RangeError);
-      expect(() => engine.setUsdToRubRate(Number.NaN)).toThrow(RangeError);
+    it.each([
+      [0],
+      [-1],
+      [Number.NaN],
+    ])('отклоняет неположительный или нечисловой курс (%p)', (rate: number) => {
+      expect(() => engine.setUsdToRubRate(rate)).toThrow(RangeError);
     });
   });
 
   describe('setVatPercent', () => {
-    it('устанавливает НДС в допустимых пределах', () => {
-      engine.setVatPercent(0);
-      expect(engine.getVatPercent()).toBe(0);
-      engine.setVatPercent(10);
-      expect(engine.getVatPercent()).toBe(10);
+    it.each([[0], [10]])('устанавливает допустимый НДС (%p%%)', (vat: number) => {
+      engine.setVatPercent(vat);
+      expect(engine.getVatPercent()).toBe(vat);
     });
 
-    it('отклоняет НДС вне 0–100', () => {
-      expect(() => engine.setVatPercent(-0.1)).toThrow(RangeError);
-      expect(() => engine.setVatPercent(101)).toThrow(RangeError);
+    it.each([
+      [-0.1],
+      [101],
+    ])('отклоняет НДС вне 0–100 (%p)', (vat: number) => {
+      expect(() => engine.setVatPercent(vat)).toThrow(RangeError);
     });
   });
 
@@ -63,9 +65,11 @@ describe('SubscriptionPriceEngine (лондонская школа: мок Curre
   });
 
   describe('yearlySavingsPercent', () => {
-    it('возвращает 0 если год не дешевле 12 месяцев', () => {
-      expect(engine.yearlySavingsPercent(10, 120)).toBe(0);
-      expect(engine.yearlySavingsPercent(10, 130)).toBe(0);
+    it.each([
+      [10, 120, 0],
+      [10, 130, 0],
+    ])('yearlySavingsPercent(%i, %i) возвращает %i', (monthlyUsd, annualUsd, expected) => {
+      expect(engine.yearlySavingsPercent(monthlyUsd, annualUsd)).toBe(expected);
     });
 
     it('считает процент экономии при выгодном годе', () => {
@@ -76,33 +80,47 @@ describe('SubscriptionPriceEngine (лондонская школа: мок Curre
       expect(engine.yearlySavingsPercent(0, 0)).toBe(0);
     });
 
-    it('отклоняет отрицательные аргументы', () => {
-      expect(() => engine.yearlySavingsPercent(-1, 100)).toThrow(RangeError);
-      expect(() => engine.yearlySavingsPercent(10, -1)).toThrow(RangeError);
+    it.each([
+      [-1, 100],
+      [10, -1],
+    ])('отклоняет отрицательные аргументы (monthly=%i, annual=%i)', (monthlyUsd, annualUsd) => {
+      expect(() => engine.yearlySavingsPercent(monthlyUsd, annualUsd)).toThrow(RangeError);
     });
   });
 
   describe('applyMinimumChargeRub', () => {
-    it('поднимает сумму до минимума при необходимости', () => {
-      expect(engine.applyMinimumChargeRub(50, 100)).toBe(100);
-      expect(engine.applyMinimumChargeRub(200, 100)).toBe(200);
+    it.each([
+      [50, 100, 100],
+      [200, 100, 200],
+    ])('applyMinimumChargeRub(%i, %i) возвращает %i', (calculatedRub, minimumRub, expected) => {
+      expect(engine.applyMinimumChargeRub(calculatedRub, minimumRub)).toBe(expected);
     });
 
-    it('отклоняет отрицательные входы', () => {
-      expect(() => engine.applyMinimumChargeRub(-1, 0)).toThrow(RangeError);
-      expect(() => engine.applyMinimumChargeRub(0, -1)).toThrow(RangeError);
+    it.each([
+      [-1, 0],
+      [0, -1],
+    ])('отклоняет отрицательные входы (calculated=%i, minimum=%i)', (calculatedRub, minimumRub) => {
+      expect(() => engine.applyMinimumChargeRub(calculatedRub, minimumRub)).toThrow(RangeError);
     });
   });
 
   describe('syncRateFromSource', () => {
-    it('подставляет курс из мока и вызывает источник один раз', async () => {
-      const fetchUsdRub = jest.fn(async () => 88.5);
-      const source: CurrencyRateSource = { fetchUsdRub };
+    describe('когда источник возвращает 88.5', () => {
+      let fetchUsdRub: jest.MockedFunction<() => Promise<number>>;
 
-      await engine.syncRateFromSource(source);
+      beforeEach(async () => {
+        fetchUsdRub = jest.fn(async () => 88.5);
+        const source: CurrencyRateSource = { fetchUsdRub };
+        await engine.syncRateFromSource(source);
+      });
 
-      expect(fetchUsdRub).toHaveBeenCalledTimes(1);
-      expect(engine.getUsdToRub()).toBe(88.5);
+      it('вызывает источник курса ровно один раз', () => {
+        expect(fetchUsdRub).toHaveBeenCalledTimes(1);
+      });
+
+      it('устанавливает курс из ответа источника', () => {
+        expect(engine.getUsdToRub()).toBe(88.5);
+      });
     });
 
     it('пробрасывает ошибку источника курса', async () => {

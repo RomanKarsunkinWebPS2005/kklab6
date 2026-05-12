@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test": "jest --coverage",
+    "test:mountebank": "jest --config jest.mountebank.config.cjs --runInBand",
     "test:watch": "jest --watch",
     "demo:currency-mock": "node scripts/demo-currency-mock.mjs",
     "mb:post-imposter": "node scripts/post-mountebank-imposter.mjs"

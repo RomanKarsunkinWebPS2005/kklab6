@@ -4,6 +4,7 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.spec.ts'],
+  testPathIgnorePatterns: ['\\.mountebank\\.spec\\.ts$'],
   collectCoverageFrom: [
     'src/subscription-price-engine.ts',
     'src/currency-rate-client.ts',

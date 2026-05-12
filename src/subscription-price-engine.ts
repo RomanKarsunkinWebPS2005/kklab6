@@ -63,7 +63,7 @@ export class SubscriptionPriceEngine {
     return Math.round(((full - annualUsd) / full) * 1000) / 10;
   }
 
-  /** Итог в рублях с «полом» минимальной суммы (например, минимальный чек). */
+  /** Итог в рублях с «полом» минимальной суммы. */
   applyMinimumChargeRub(calculatedRub: number, minimumRub: number): number {
     if (!Number.isFinite(calculatedRub) || calculatedRub < 0) {
       throw new RangeError('calculatedRub не может быть отрицательным');
@@ -74,7 +74,7 @@ export class SubscriptionPriceEngine {
     return Math.max(calculatedRub, minimumRub);
   }
 
-  /** Мутация курса из внешнего источника (в лабе — мок или Mountebank). */
+  /** Мутация курса из внешнего источника */
   async syncRateFromSource(source: CurrencyRateSource): Promise<void> {
     const rate = await source.fetchUsdRub();
     this.setUsdToRubRate(rate);

@@ -1,0 +1,8 @@
+{"level":"info","message":"[mb:2525] mountebank v2.9.1 now taking orders - point your browser to http://localhost:2525/ for help","timestamp":"2026-05-12T11:36:17.845Z"}
+{"level":"info","message":"[mb:2525] POST /imposters","timestamp":"2026-05-12T11:36:58.897Z"}
+{"level":"info","message":"[http:4545 currency-usd-rub] Open for business...","timestamp":"2026-05-12T11:36:58.906Z"}
+{"level":"info","message":"[http:4545 currency-usd-rub] ::1:53760 => GET /rates/usd-rub","timestamp":"2026-05-12T11:37:03.827Z"}
+{"level":"info","message":"[http:4545 currency-usd-rub] ::1:53761 => GET /rates/usd-rub","timestamp":"2026-05-12T11:37:03.845Z"}
+{"level":"info","message":"[http:4545 currency-usd-rub] ::1:53762 => GET /rates/usd-rub","timestamp":"2026-05-12T11:37:03.854Z"}
+{"level":"info","message":"[http:4545 currency-usd-rub] ::1:53763 => GET /rates/usd-rub","timestamp":"2026-05-12T11:37:03.862Z"}
+{"level":"info","message":"[mb:2525] Adios - see you soon?","timestamp":"2026-05-12T11:37:09.289Z"}
